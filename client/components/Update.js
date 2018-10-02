@@ -6,10 +6,11 @@ import {Link} from 'react-router-dom';
 
 var querystring = require('querystring');
 
-class Add extends React.Component {
+class Update extends React.Component {
     constructor() {
         super();
         this.state = {
+            id: '',
             description: '',
             amount: '',
             month: '',
@@ -21,7 +22,7 @@ class Add extends React.Component {
         this.handleSelectChange = this.handleSelectChange.bind(this);
         this.onClick = this.onClick.bind(this);
         this.handleTextChange = this.handleTextChange.bind(this);
-        this.insertNewExpense = this.insertNewExpense.bind(this);
+        this.update = this.update.bind(this);
         this.openModal = this.openModal.bind(this);
         this.closeModal = this.closeModal.bind(this);
 
@@ -34,27 +35,27 @@ class Add extends React.Component {
     }
 
     onClick(e) {
-        this.insertNewExpense(this);
+        console.info(this);
+        this.update(this);
     }
 
     closeModal() {
         this.setState({
             modalIsOpen: false,
-            description: '',
-            amount: '',
-            month: 'Jan',
-            year: 2016,
             messageFromServer: ''
         });
     }
 
     componentDidMount() {
+        console.info(this.props.expense);
         this.setState({
-            month: this.props.selectedMonth
+            id: this.props.expense._id,
+            description: this.props.expense.description,
+            amount: this.props.expense.amount,
+            month: this.props.expense.month,
+            year: this.props.expense.year
         });
-        this.setState({
-            year: this.props.selectedYear
-        });
+
     }
 
     handleSelectChange(e) {
@@ -73,6 +74,7 @@ class Add extends React.Component {
 
     handleTextChange(e) {
         if (e.target.name === "description") {
+            console.info(e.target.value);
             this.setState({
                 description: e.target.value
             });
@@ -84,10 +86,11 @@ class Add extends React.Component {
         }
     }
 
-    insertNewExpense(e) {
-        axios.post('/insert',
+    update(e) {
+        axios.post('/update',
             querystring.stringify({
-                desc: e.state.description,
+                _id: e.state.id,
+                description: e.state.description,
                 amount: e.state.amount,
                 month: e.state.month,
                 year: e.state.year
@@ -98,19 +101,21 @@ class Add extends React.Component {
             }).then(function(response) {
                 e.setState({
                     messageFromServer: response.data
-                });
             });
+        });
     }
 
     render() {
         if(this.state.messageFromServer === '') {
+            console.info("in modal");
+            console.info(this.state);
             return(
                 <div>
-                    <Button bsStyle="success" bsSize="small" onClick={this.openModal}><span className="glyphicon glyphicon-plus"></span></Button>
+                    <Button bsStyle="warning" bsSize="small" onClick={this.openModal}><span className="glyphicon glyphicon-pencil"></span></Button>
                     <Modal
                         isOpen={this.state.modalIsOpen}
                         onRequestClose={this.closeModal}
-                        contentLabel="Add Expense"
+                        contentLabel="Update Expense"
                         className="Modal">
                         <Link to={{pathname: '/', search: '' }} style={{ textDecoration: 'none' }}>
                             <Button bsStyle="danger" bsSize="mini" onClick={this.closeModal}><span className="closebtn glyphicon glyphicon-remove"></span></Button>
@@ -118,14 +123,14 @@ class Add extends React.Component {
                         <fieldset>
                             <label htmlFor="description">Описание:</label>
                             <input type="text" id="description"
-                                name="description"
-                                value={this.state.description}
-                                onChange={this.handleTextChange}>
+                                   name="description"
+                                   value={this.state.description}
+                                   onChange={this.handleTextChange}>
                             </input>
                             <label htmlFor="amount">Сумма:</label>
                             <input type="number" id="amount" name="amount"
-                                  value={this.state.amount}
-                                  onChange={this.handleTextChange}>
+                                   value={this.state.amount}
+                                   onChange={this.handleTextChange}>
                             </input>
 
                             {/*TODO: сделать через массив*/}
@@ -156,7 +161,7 @@ class Add extends React.Component {
                         </fieldset>
                         <div className='button-center'>
                             <br/>
-                            <Button bsStyle="success" bsSize="small" onClick={this.onClick}>Новые расходы</Button>
+                            <Button bsStyle="warning" bsSize="small" onClick={this.onClick}>Обновить</Button>
                         </div>
                     </Modal>
                 </div>
@@ -164,14 +169,14 @@ class Add extends React.Component {
         } else {
             return (
                 <div>
-                    <Button bsStyle="success" bsSize="small" onClick={this.openModal}>
-                        <span className="glyphicon glyphicon-plus"/>
+                    <Button bsStyle="warning" bsSize="small" onClick={this.openModal}>
+                        <span className="glyphicon glyphicon-pencil"/>
                     </Button>
                     <Modal
                         isOpen={this.state.modalIsOpen}
                         onAfterOpen={this.afterOpenModal}
                         onRequestClose={this.closeModal}
-                        contentLabel="Add Expense"
+                        contentLabel="Update Expense"
                         className="Modal">
                         <div className='button-center'>
                             <h3>{this.state.messageFromServer}</h3>
@@ -187,4 +192,4 @@ class Add extends React.Component {
 
 }
 
-export default Add;
+export default Update;
