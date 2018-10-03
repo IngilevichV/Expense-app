@@ -30,12 +30,19 @@ class Update extends React.Component {
 
     openModal() {
         this.setState({
+            id: this.props.expense._id,
+            description: this.props.expense.description,
+            amount: this.props.expense.amount,
+            month: this.props.expense.month,
+            year: this.props.expense.year
+        });
+        this.setState({
             modalIsOpen: true
         });
     }
 
     onClick(e) {
-        console.info(this);
+
         this.update(this);
     }
 
@@ -47,7 +54,6 @@ class Update extends React.Component {
     }
 
     componentDidMount() {
-        console.info(this.props.expense);
         this.setState({
             id: this.props.expense._id,
             description: this.props.expense.description,
@@ -57,6 +63,8 @@ class Update extends React.Component {
         });
 
     }
+
+
 
     handleSelectChange(e) {
         if (e.target.name === 'month') {
@@ -74,7 +82,6 @@ class Update extends React.Component {
 
     handleTextChange(e) {
         if (e.target.name === "description") {
-            console.info(e.target.value);
             this.setState({
                 description: e.target.value
             });
@@ -107,8 +114,6 @@ class Update extends React.Component {
 
     render() {
         if(this.state.messageFromServer === '') {
-            console.info("in modal");
-            console.info(this.state);
             return(
                 <div>
                     <Button bsStyle="warning" bsSize="small" onClick={this.openModal}><span className="glyphicon glyphicon-pencil"></span></Button>

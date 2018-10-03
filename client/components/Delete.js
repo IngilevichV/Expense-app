@@ -17,11 +17,12 @@ class Delete extends React.Component {
     }
     onClick(e){
         this.delete(this);
+
     }
     delete(e){
         axios.get('/delete?id='+e.state.id)
             .then(function(response) {
-
+                alert("success");
             });
     }
     render(){
