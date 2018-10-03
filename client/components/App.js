@@ -18,11 +18,11 @@ class App extends Component {
             activeTab: 2016
         };
         this.getData = this.getData.bind(this);
+        this.handleSelect = this.handleSelect.bind(this);
     }
     componentDidMount() {
 
-        this.getData(this, '2016', 'ALL');
-        console.info("componentDidMount");
+        this.getData(this, 2016, 'All');
     }
     componentWillReceiveProps(nextProps) {
         if(nextProps.history.location.search){
@@ -49,22 +49,28 @@ class App extends Component {
     }
 
     handleSelect(selectedTab){
+        // console.info("active");
+        // console.info(this.state.activeTab);
+        // console.info(this.state.selectedYear);
         this.setState({
             activeTab: selectedTab,
-            selectedYear: selectedTab
+            selectedYear: parseInt(selectedTab)
         });
+
     }
 
     render() {
-        console.info(this.state);
+        // console.info("active");
+        // console.info(this.state.activeTab);
         return (
+
             <div>
                 <Tabs activeKey={this.state.activeTab} onSelect={this.handleSelect}>
-                    <Tab eventKey={2016} title={<YearTabsRouter year='2016' />}></Tab>
-                    <Tab eventKey={2017} title={<YearTabsRouter year='2017' />}></Tab>
-                    <Tab eventKey={2018} title={<YearTabsRouter year='2018'/>}></Tab>
-                    <Tab eventKey={2019} title={<YearTabsRouter year='2019'/>}></Tab>
-                    <Tab eventKey={2020} title={<YearTabsRouter year='2020'/>}></Tab>
+                    <Tab eventKey={2016} title={<YearTabsRouter year='2016'/>}/>
+                    <Tab eventKey={2017} title={<YearTabsRouter year='2017'/>}/>
+                    <Tab eventKey={2018} title={<YearTabsRouter year='2018'/>}/>
+                    <Tab eventKey={2019} title={<YearTabsRouter year='2019'/>}/>
+                    <Tab eventKey={2020} title={<YearTabsRouter year='2020'/>}/>
                 </Tabs>
                 <Add selectedMonth={this.state.selectedMonth} selectedYear={this.state.selectedYear} />
                 <table>
@@ -74,7 +80,15 @@ class App extends Component {
                     <tbody>
                     {
                         this.state.data.map((exp) => {
-                            return  <tr><td className='counterCell'></td><td className='desc-col'>{exp.description}</td><td className='button-col'>{exp.amount}</td><td className='button-col'>{exp.month}</td><td className='button-col'>{exp.year}</td><td className='button-col'><Update expense={exp}/></td><td className='button-col'><Delete expense={exp} /></td></tr>
+                            return  <tr>
+                                <td className='counterCell'/>
+                                <td className='desc-col'>{exp.description}</td>
+                                <td className='button-col'>{exp.amount}</td>
+                                <td className='button-col'>{exp.month}</td>
+                                <td className='button-col'>{exp.year}</td>
+                                <td className='button-col'><Update expense={exp}/></td>
+                                <td className='button-col'><Delete expense={exp} /></td>
+                            </tr>
                         })
                     }
                     </tbody>
