@@ -6,6 +6,8 @@ import Update from './Update';
 import Delete from './Delete';
 import YearTabsRouter from './tabs/yearTabsRouter';
 import { Tab, Tabs } from 'react-bootstrap';
+import MonthTabs from './tabs/monthTabs';
+import BarChart from './barChart';
 
 class App extends Component {
 
@@ -19,12 +21,15 @@ class App extends Component {
         };
         this.getData = this.getData.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
+        this.checkChart = this.checkChart.bind(this);
     }
     componentDidMount() {
-
+        console.info("started");
         this.getData(this, 2016, 'All');
     }
     componentWillReceiveProps(nextProps) {
+        console.info("nextProps");
+        console.info(nextProps);
         if(nextProps.history.location.search){
             var search = nextProps.history.location.search;
             search = search.substring(1);
@@ -49,33 +54,41 @@ class App extends Component {
     }
 
     handleSelect(selectedTab){
-        // console.info("active");
-        // console.info(this.state.activeTab);
+        console.info("active");
+        console.info(selectedTab);
         // console.info(this.state.selectedYear);
         this.setState({
             activeTab: selectedTab,
             selectedYear: parseInt(selectedTab)
         });
-
+    }
+    checkChart() {
+        alert(this.state.data);
     }
 
     render() {
-        // console.info("active");
-        // console.info(this.state.activeTab);
         return (
 
             <div>
                 <Tabs activeKey={this.state.activeTab} onSelect={this.handleSelect}>
-                    <Tab eventKey={2016} title={<YearTabsRouter year='2016'/>}/>
-                    <Tab eventKey={2017} title={<YearTabsRouter year='2017'/>}/>
-                    <Tab eventKey={2018} title={<YearTabsRouter year='2018'/>}/>
-                    <Tab eventKey={2019} title={<YearTabsRouter year='2019'/>}/>
-                    <Tab eventKey={2020} title={<YearTabsRouter year='2020'/>}/>
+                    <Tab eventKey={2016} title={<YearTabsRouter year='2016'/>}><MonthTabs year='2016' monthlyActiveTab={this.state.selectedMonth}/></Tab>
+                    <Tab eventKey={2017} title={<YearTabsRouter year='2017'/>}><MonthTabs year='2017' monthlyActiveTab={this.state.selectedMonth}/></Tab>
+                    <Tab eventKey={2018} title={<YearTabsRouter year='2018'/>}><MonthTabs year='2018' monthlyActiveTab={this.state.selectedMonth}/></Tab>
+                    <Tab eventKey={2019} title={<YearTabsRouter year='2019'/>}><MonthTabs year='2019' monthlyActiveTab={this.state.selectedMonth}/></Tab>
+                    <Tab eventKey={2020} title={<YearTabsRouter year='2020'/>}><MonthTabs year='2020' monthlyActiveTab={this.state.selectedMonth}/></Tab>
                 </Tabs>
                 <Add selectedMonth={this.state.selectedMonth} selectedYear={this.state.selectedYear} />
                 <table>
                     <thead>
-                    <tr><th></th><th className='desc-col'>Description</th><th className='button-col'>Amount</th><th className='button-col'>Month</th><th className='button-col'>Year</th><th className='button-col'>Update</th><th className='button-col'>Delete</th></tr>
+                    <tr>
+                        <th></th>
+                        <th className='desc-col'>Description</th>
+                        <th className='button-col'>Amount</th>
+                        <th className='button-col'>Month</th>
+                        <th className='button-col'>Year</th>
+                        <th className='button-col'>Update</th>
+                        <th className='button-col'>Delete</th>
+                    </tr>
                     </thead>
                     <tbody>
                     {
@@ -93,6 +106,7 @@ class App extends Component {
                     }
                     </tbody>
                 </table>
+                <BarChart />
             </div>
         );
     }

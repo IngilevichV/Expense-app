@@ -17,8 +17,16 @@ class Delete extends React.Component {
     }
     onClick(e){
         this.delete(this);
-
     }
+
+    componentWillReceiveProps(nextProps){
+        this.setState({
+            id: nextProps.expense._id,
+            month:nextProps.expense.month,
+            year:nextProps.expense.year
+        })
+    }
+
     delete(e){
         axios.get('/delete?id='+e.state.id)
             .then(function(response) {
@@ -29,7 +37,7 @@ class Delete extends React.Component {
         return (
             <Link to={{pathname: '/', search: '' }} style={{ textDecoration: 'none' }}>
                 <Button bsStyle="danger" bsSize="small" onClick={this.onClick}>
-                    <span className="glyphicon glyphicon-remove"></span>
+                    <span className="glyphicon glyphicon-remove"/>
                 </Button>
             </Link>
         )
