@@ -1,4 +1,7 @@
+//client/components/tabs/yearTabsRouter.js
 import React from 'react';
+import ReactDOM from 'react-dom';
+import { Tab, Tabs } from 'react-bootstrap'
 import { Link } from 'react-router-dom';
 
 class YearTabsRouter extends React.Component {
