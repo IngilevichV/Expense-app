@@ -44429,7 +44429,7 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
                     })
                 )
             ),
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__barChart__["a" /* default */], { onClick: this.checkChart })
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__barChart__["a" /* default */], null)
         );
     }
 }
@@ -58290,7 +58290,6 @@ class BarChart extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     }
 
     render() {
-        this.props.onClick();
         const margins = { top: 50, right: 20, bottom: 100, left: 60 };
         const svgDimensions = { width: 800, height: 500 };
         const maxValue = Math.max(...data.map(d => d.value));
