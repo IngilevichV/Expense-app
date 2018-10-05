@@ -64,7 +64,14 @@ class Update extends React.Component {
 
     }
 
-
+    componentWillReceiveProps(nextProps){
+        this.setState({
+            id: nextProps.expense._id,
+            description: nextProps.expense.description,
+            month:nextProps.expense.month,
+            year:nextProps.expense.year
+        })
+    }
 
     handleSelectChange(e) {
         if (e.target.name === 'month') {
