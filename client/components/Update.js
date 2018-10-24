@@ -42,8 +42,8 @@ class Update extends React.Component {
     }
 
     onClick(e) {
-
         this.update(this);
+
     }
 
     closeModal() {
@@ -51,6 +51,7 @@ class Update extends React.Component {
             modalIsOpen: false,
             messageFromServer: ''
         });
+        this.props.func();
     }
 
     componentDidMount() {
@@ -115,7 +116,8 @@ class Update extends React.Component {
             }).then(function(response) {
                 e.setState({
                     messageFromServer: response.data
-            });
+                });
+
         });
     }
 

@@ -35,9 +35,11 @@ class Add extends React.Component {
 
     onClick(e) {
         this.insertNewExpense(this);
+
     }
 
     closeModal() {
+        this.props.func();
         this.setState({
             modalIsOpen: false,
             description: '',
@@ -46,6 +48,7 @@ class Add extends React.Component {
             year: 2016,
             messageFromServer: ''
         });
+
     }
 
     componentDidMount() {

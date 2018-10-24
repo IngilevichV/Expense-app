@@ -17,6 +17,7 @@ class Delete extends React.Component {
     }
     onClick(e){
         this.delete(this);
+        this.props.func();
     }
 
     componentWillReceiveProps(nextProps){

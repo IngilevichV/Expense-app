@@ -7,7 +7,9 @@ import Delete from './Delete';
 import YearTabsRouter from './tabs/yearTabsRouter';
 import { Tab, Tabs } from 'react-bootstrap';
 import MonthTabs from './tabs/monthTabs';
+// import BarChart_old from './barChart';
 import BarChart from './barChart';
+
 
 class App extends Component {
 
@@ -17,19 +19,26 @@ class App extends Component {
             selectedMonth:'All',
             selectedYear: 2016,
             data: [],
-            activeTab: 2016
+            activeTab: 2016,
+            barChartData: [],
+            body_width: document.body.clientWidth/2.5
         };
         this.getData = this.getData.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
         this.checkChart = this.checkChart.bind(this);
+        this.getDataForBarChart = this.getDataForBarChart.bind(this);
     }
     componentDidMount() {
-        console.info("started");
         this.getData(this, 2016, 'All');
+
     }
+
+    componentWillMount() {
+        this.getDataForBarChart(this, 2016, 'All')
+    }
+
+
     componentWillReceiveProps(nextProps) {
-        console.info("nextProps");
-        console.info(nextProps);
         if(nextProps.history.location.search){
             var search = nextProps.history.location.search;
             search = search.substring(1);
@@ -38,6 +47,7 @@ class App extends Component {
             this.setState({selectedYear: searchObj.year});
             this.setState({selectedMonth: searchObj.month});
             this.getData(this, searchObj.year, searchObj.month);
+            this.getDataForBarChart(this, 2016, 'All');
         }else{
             this.getData(this, 2016, 'All');
         }
@@ -53,9 +63,20 @@ class App extends Component {
             });
     }
 
+
+    getDataForBarChart(ev, year, month){
+
+        axios.get('/getAll?month='+month+'&year='+year)
+            .then(function(response) {
+                let data = []
+                response.data.map((obj) => {
+                    data.push({title: obj.description, value: obj.amount})
+                });
+                ev.setState({barChartData: data});
+            });
+    }
+
     handleSelect(selectedTab){
-        console.info("active");
-        console.info(selectedTab);
         // console.info(this.state.selectedYear);
         this.setState({
             activeTab: selectedTab,
@@ -77,7 +98,7 @@ class App extends Component {
                     <Tab eventKey={2019} title={<YearTabsRouter year='2019'/>}><MonthTabs year='2019' monthlyActiveTab={this.state.selectedMonth}/></Tab>
                     <Tab eventKey={2020} title={<YearTabsRouter year='2020'/>}><MonthTabs year='2020' monthlyActiveTab={this.state.selectedMonth}/></Tab>
                 </Tabs>
-                <Add selectedMonth={this.state.selectedMonth} selectedYear={this.state.selectedYear} />
+                <Add selectedMonth={this.state.selectedMonth} selectedYear={this.state.selectedYear} func={() => this.getDataForBarChart(this, 2016, 'All')}/>
                 <table>
                     <thead>
                     <tr>
@@ -99,14 +120,25 @@ class App extends Component {
                                 <td className='button-col'>{exp.amount}</td>
                                 <td className='button-col'>{exp.month}</td>
                                 <td className='button-col'>{exp.year}</td>
-                                <td className='button-col'><Update expense={exp}/></td>
-                                <td className='button-col'><Delete expense={exp} /></td>
+                                <td className='button-col'><Update expense={exp} func={() => this.getDataForBarChart(this, 2016, 'All')}/></td>
+                                <td className='button-col'><Delete expense={exp} func={() => this.getDataForBarChart(this, 2016, 'All')}/></td>
                             </tr>
                         })
                     }
                     </tbody>
                 </table>
-                <BarChart />
+                {/*<BarChart_old data={this.state.barChartData}/>*/}
+                <BarChart
+                    className="barChartComponet"
+                    data={this.state.barChartData}
+                    width={this.state.body_width}
+                    height={430}
+                    xFn={d => d.title}
+                    yFn={d => d.value}
+                    margin={{ top: 60, left: 40, bottom: 20, right: 20 }}
+                    paddingInner={0.1}
+                    paddingOuter={0.1}
+                />
             </div>
         );
     }
