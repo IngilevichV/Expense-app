@@ -62,12 +62,15 @@ router.get('/getAll',function(req, res) {
             res.json(expenses);
         });
     }
+
     else {
         Expense.find({year: yearRec}, function(err, expenses) {
             if (err)
                 res.send(err);
             res.json(expenses);
         });
+
+
     }
 });
 module.exports = router;

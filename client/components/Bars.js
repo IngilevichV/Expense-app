@@ -17,15 +17,16 @@ class Bars extends React.Component {
         const { xScale, yScale } = scales;
         const { height } = svgDimensions;
 
+        console.info(data);
         const bars = (
             data.map(datum =>
                 <rect
-                    key={datum.title}
-                    x={xScale(datum.title)}
-                    y={yScale(datum.value)}
-                    height={height - margins.bottom - scales.yScale(datum.value)}
+                    key={datum.index}
+                    x={xScale(datum.index)}
+                    y={yScale(datum[1])}
+                    height={height - margins.bottom - scales.yScale(datum[1])}
                     width={xScale.bandwidth()}
-                    fill={this.colorScale(datum.value)}
+                    fill={this.colorScale(datum.index)}
                 />,
             )
         );

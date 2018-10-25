@@ -32,27 +32,27 @@ class App extends Component {
         this.checkChart = this.checkChart.bind(this);
         this.getDataForBarChart = this.getDataForBarChart.bind(this);
     }
+
     componentDidMount() {
         this.getData(this, 2016, 'All');
-
+        this.getDataForBarChart(this, 'All', 'All');
     }
 
     componentWillMount() {
-        this.getDataForBarChart(this, 'All', 'All')
+        console.info(this.state.barChartData);
     }
 
-
     componentWillReceiveProps(nextProps) {
-        if(nextProps.history.location.search){
+        if(nextProps.history.location.search) {
             var search = nextProps.history.location.search;
             search = search.substring(1);
-            var searchObj = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g,'":"') + '"}');
+            var searchObj = JSON.parse(`{"${decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"')}"}`);
             this.setState({activeTab: parseInt(searchObj.year)});
             this.setState({selectedYear: searchObj.year});
             this.setState({selectedMonth: searchObj.month});
             this.getData(this, searchObj.year, searchObj.month);
             this.getDataForBarChart(this, 'All', 'All');
-        }else{
+        } else {
             this.getData(this, 2016, 'All');
         }
     }
@@ -67,9 +67,6 @@ class App extends Component {
             });
     }
 
-
-
-
     getDataForBarChart(ev, year, month){
         axios.get('/getAll?month='+month+'&year='+year)
             .then(function(response) {
@@ -77,61 +74,64 @@ class App extends Component {
                 response.data.map((obj) => {
                     data.push({title: obj.description, value: obj.amount})
                 });
-                // console.info("barChartData");
-                // console.info(response.data);
-                // let data_for_stacked = response.data;
-                // let stackedData = [];
-                // let yearsData = {};
-                // data_for_stacked.map(function(d){
-                //     if (Object.keys(yearsData).includes(String(d.year))) {
-                //         if (Object.keys(yearsData[d.year]).includes(d.month)) {
-                //             yearsData[d.year][d.month] += d.amount;
-                //         } else {
-                //             yearsData[d.year][d.month] = d.amount;
-                //         }
-                //     } else {
-                //         yearsData[d.year] = {};
-                //         yearsData[d.year][d.month] = d.amount;
-                //     }
-                // });
-                // // console.info(yearsData);
-                // for (let key in yearsData) {
-                //     // noinspection JSUnfilteredForInLoop
-                //     const tempObj = yearsData[key];
-                //     tempObj["year"] = key;
-                //     stackedData.push(tempObj);
-                // }
-                // console.info(stackedData);
-                // let test = []
-                // var data_test = d3.stack()(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(function(m) {
-                //     return stackedData.map(function(d) {
-                //         test.push() {x: parse(d.year), y: +d[fruit]);
-                //     });
-                // }));
-                //
-                // let data_test = d3.stack().(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(function(m) {
-                //     return stackedData.map(function(d) {
-                //         test.push({x: new Date(d.year), y: d[m] ? +d[m] : 0});
-                //     });
-                // }));
-                // setTimeout(console.info(test), 1000000);
 
-                ev.setState({barChartData: data});
-            });
+                let data_for_stacked = response.data;
+                let stackedData = [];
+                let yearsData = {};
+                data_for_stacked.map(function(d){
+                    if (Object.keys(yearsData).includes(String(d.year))) {
+                        if (Object.keys(yearsData[d.year]).includes(d.month)) {
+                            yearsData[d.year][d.month] += d.amount;
+                        } else {
+                            yearsData[d.year][d.month] = d.amount;
+                        }
+                    } else {
+                        yearsData[d.year] = {};
+                        yearsData[d.year][d.month] = d.amount;
+                    }
+                });
+
+                for (let key in yearsData) {
+                    // noinspection JSUnfilteredForInLoop
+                    const tempObj = yearsData[key];
+                    tempObj["year"] = key;
+                    stackedData.push(tempObj);
+                }
+                console.info("stacked_data", stackedData);
+
+                let test = d3.stack().keys(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])(stackedData);
+
+                test.forEach(function(arr) {
+                    arr.forEach(function(elem) {
+                        elem.forEach(function(e, i) {
+                            if (!e) {
+                                elem[i] = 0;
+                            }
+                        })
+                    })
+                })
+
+                console.info('print test', test);
+                return test;
+
+            })
+            .then(function(data) {ev.setState({barChartData: data});});
     }
 
     handleSelect(selectedTab){
-        // console.info(this.state.selectedYear);
         this.setState({
             activeTab: selectedTab,
             selectedYear: parseInt(selectedTab)
         });
     }
+
     checkChart() {
         alert(this.state.data);
     }
 
     render() {
+        console.info("render");
+        console.info(this.state.barChartData);
         return (
 
             <div>
@@ -146,7 +146,7 @@ class App extends Component {
                 <table>
                     <thead>
                     <tr>
-                        <th></th>
+                        <th/>
                         <th className='desc-col'>Description</th>
                         <th className='button-col'>Amount</th>
                         <th className='button-col'>Month</th>

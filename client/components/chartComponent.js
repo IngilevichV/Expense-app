@@ -71,7 +71,11 @@ export const Bars = D3blackbox(function() {
     enter
         .append("rect")
         .attr("height", 0)
-        .attr("transform", d => `translate(${d.x}, ${this.props.plotHeight})`);
+        .attr("transform", function(d) {
+            console.info("d");
+            console.info(d);
+            return "translate(" + d[0].x  + "," + d[0].height + ")";
+        });
 
     const exit = current.exit().classed("bar", false);
     exit
@@ -87,6 +91,6 @@ export const Bars = D3blackbox(function() {
         .attr("width", d => d.width)
         .transition()
         .duration(1000)
-        .attr("transform", d => `translate(${d.x}, ${d.y})`)
+        .attr("transform", d => `translate(${d[0].x}, ${d[0].y})`)
         .attr("height", d => d.height);
 });

@@ -8204,7 +8204,7 @@ exports.default = SafeHTMLElement;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__dist_package__ = __webpack_require__(546);
 /* unused harmony reexport version */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_d3_array__ = __webpack_require__(17);
-/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_1_d3_array__["e"]; });
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_1_d3_array__["h"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_d3_axis__ = __webpack_require__(563);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_2_d3_axis__["a"]; });
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_2_d3_axis__["b"]; });
@@ -8255,7 +8255,7 @@ exports.default = SafeHTMLElement;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_24_d3_selection__ = __webpack_require__(15);
 /* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "g", function() { return __WEBPACK_IMPORTED_MODULE_24_d3_selection__["f"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_25_d3_shape__ = __webpack_require__(846);
-/* unused harmony namespace reexport */
+/* harmony namespace reexport (by used) */ __webpack_require__.d(__webpack_exports__, "h", function() { return __WEBPACK_IMPORTED_MODULE_25_d3_shape__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_26_d3_time__ = __webpack_require__(102);
 /* unused harmony namespace reexport */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_27_d3_time_format__ = __webpack_require__(165);
@@ -44385,19 +44385,21 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
         this.checkChart = this.checkChart.bind(this);
         this.getDataForBarChart = this.getDataForBarChart.bind(this);
     }
+
     componentDidMount() {
         this.getData(this, 2016, 'All');
+        this.getDataForBarChart(this, 'All', 'All');
     }
 
     componentWillMount() {
-        this.getDataForBarChart(this, 'All', 'All');
+        console.info(this.state.barChartData);
     }
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.history.location.search) {
             var search = nextProps.history.location.search;
             search = search.substring(1);
-            var searchObj = JSON.parse('{"' + decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"') + '"}');
+            var searchObj = JSON.parse(`{"${decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"')}"}`);
             this.setState({ activeTab: parseInt(searchObj.year) });
             this.setState({ selectedYear: searchObj.year });
             this.setState({ selectedMonth: searchObj.month });
@@ -44423,61 +44425,64 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
             response.data.map(obj => {
                 data.push({ title: obj.description, value: obj.amount });
             });
-            // console.info("barChartData");
-            // console.info(response.data);
-            // let data_for_stacked = response.data;
-            // let stackedData = [];
-            // let yearsData = {};
-            // data_for_stacked.map(function(d){
-            //     if (Object.keys(yearsData).includes(String(d.year))) {
-            //         if (Object.keys(yearsData[d.year]).includes(d.month)) {
-            //             yearsData[d.year][d.month] += d.amount;
-            //         } else {
-            //             yearsData[d.year][d.month] = d.amount;
-            //         }
-            //     } else {
-            //         yearsData[d.year] = {};
-            //         yearsData[d.year][d.month] = d.amount;
-            //     }
-            // });
-            // // console.info(yearsData);
-            // for (let key in yearsData) {
-            //     // noinspection JSUnfilteredForInLoop
-            //     const tempObj = yearsData[key];
-            //     tempObj["year"] = key;
-            //     stackedData.push(tempObj);
-            // }
-            // console.info(stackedData);
-            // let test = []
-            // var data_test = d3.stack()(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(function(m) {
-            //     return stackedData.map(function(d) {
-            //         test.push() {x: parse(d.year), y: +d[fruit]);
-            //     });
-            // }));
-            //
-            // let data_test = d3.stack().(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(function(m) {
-            //     return stackedData.map(function(d) {
-            //         test.push({x: new Date(d.year), y: d[m] ? +d[m] : 0});
-            //     });
-            // }));
-            // setTimeout(console.info(test), 1000000);
 
+            let data_for_stacked = response.data;
+            let stackedData = [];
+            let yearsData = {};
+            data_for_stacked.map(function (d) {
+                if (Object.keys(yearsData).includes(String(d.year))) {
+                    if (Object.keys(yearsData[d.year]).includes(d.month)) {
+                        yearsData[d.year][d.month] += d.amount;
+                    } else {
+                        yearsData[d.year][d.month] = d.amount;
+                    }
+                } else {
+                    yearsData[d.year] = {};
+                    yearsData[d.year][d.month] = d.amount;
+                }
+            });
+
+            for (let key in yearsData) {
+                // noinspection JSUnfilteredForInLoop
+                const tempObj = yearsData[key];
+                tempObj["year"] = key;
+                stackedData.push(tempObj);
+            }
+            console.info("stacked_data", stackedData);
+
+            let test = __WEBPACK_IMPORTED_MODULE_10_d3__["h" /* stack */]().keys(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])(stackedData);
+
+            test.forEach(function (arr) {
+                arr.forEach(function (elem) {
+                    elem.forEach(function (e, i) {
+                        if (!e) {
+                            elem[i] = 0;
+                        }
+                    });
+                });
+            });
+
+            console.info('print test', test);
+            return test;
+        }).then(function (data) {
             ev.setState({ barChartData: data });
         });
     }
 
     handleSelect(selectedTab) {
-        // console.info(this.state.selectedYear);
         this.setState({
             activeTab: selectedTab,
             selectedYear: parseInt(selectedTab)
         });
     }
+
     checkChart() {
         alert(this.state.data);
     }
 
     render() {
+        console.info("render");
+        console.info(this.state.barChartData);
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'div',
             null,
@@ -58467,14 +58472,21 @@ class BarChart extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
         super();
     }
 
+    componentDidMount() {}
+
     updateScale(props) {
-        const data = props.data;
+        console.info("props");
+        console.info(props);
+        // const data = props.data;
 
         const xScale = __WEBPACK_IMPORTED_MODULE_1_d3__["e" /* scaleBand */]();
         const yScale = __WEBPACK_IMPORTED_MODULE_1_d3__["f" /* scaleLinear */]().nice();
 
-        const xDomain = data.map(props.xFn);
-        const yDomain = [0, __WEBPACK_IMPORTED_MODULE_1_d3__["d" /* max */](data, d => props.yFn(d))];
+        // const xDomain = data.map(props.xFn);
+        // const xDomain = [2016,2017,2018,2019,2020]
+        const xDomain = __WEBPACK_IMPORTED_MODULE_1_d3__["d" /* range */](12);
+        // const yDomain = [0, d3.max(data, d => props.yFn(d))];
+        const yDomain = [0, 50000];
 
         xScale.domain(xDomain).range([0, props.width - (props.margin.left + props.margin.right)]).paddingInner(props.paddingInner).paddingOuter(props.paddingOuter);
 
@@ -58503,17 +58515,32 @@ class BarChart extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
         };
         const plotData = {
             plotData: this.props.data.map((d, i) => {
-                return {
-                    id: i,
-                    data: d,
-                    x: xScale(this.props.xFn(d)),
-                    y: yScale(this.props.yFn(d)),
-                    width: xScale.bandwidth() - 5,
-                    height: plotHeight - yScale(this.props.yFn(d))
-                };
+                return d.map(new_d => {
+                    return {
+                        id: i,
+                        data: d,
+                        x: xScale(i),
+                        y: yScale(new_d[1]),
+                        width: xScale.bandwidth() - 5,
+                        height: plotHeight - yScale(new_d[0]) - yScale(new_d[1])
+                    };
+                });
+
+                // console.info(d);
+                // return {
+                //     id: i,
+                //     data: d,
+                //     x: xScale(i),
+                //     y: yScale(d[1]),
+                //     width: xScale.bandwidth() - 5,
+                //     height: d.map((new_d) => {
+                //         return plotHeight - yScale(new_d[0]) - yScale(new_d[1])
+                //     })
+                // };
             })
         };
-
+        console.info("metaData", metaData);
+        console.info("plotData", plotData);
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             "svg",
             { width: this.props.width, height: this.props.height },
@@ -70582,7 +70609,7 @@ var plasma = ramp(Object(__WEBPACK_IMPORTED_MODULE_0__colors__["a" /* default */
 /* unused harmony reexport curveStepAfter */
 /* unused harmony reexport curveStepBefore */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_31__stack__ = __webpack_require__(863);
-/* unused harmony reexport stack */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_31__stack__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_32__offset_expand__ = __webpack_require__(864);
 /* unused harmony reexport stackOffsetExpand */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_33__offset_diverging__ = __webpack_require__(865);
@@ -71855,7 +71882,7 @@ function stackValue(d, key) {
   return d[key];
 }
 
-/* unused harmony default export */ var _unused_webpack_default_export = (function() {
+/* harmony default export */ __webpack_exports__["a"] = (function() {
   var keys = Object(__WEBPACK_IMPORTED_MODULE_1__constant__["a" /* default */])([]),
       order = __WEBPACK_IMPORTED_MODULE_3__order_none__["a" /* default */],
       offset = __WEBPACK_IMPORTED_MODULE_2__offset_none__["a" /* default */],
@@ -72922,12 +72949,16 @@ const Bars = D3blackbox(function () {
     const enter = current.enter().append("g").classed("bar", true);
     enter.attr("fill", "blue");
 
-    enter.append("rect").attr("height", 0).attr("transform", d => `translate(${d.x}, ${this.props.plotHeight})`);
+    enter.append("rect").attr("height", 0).attr("transform", function (d) {
+        console.info("d");
+        console.info(d);
+        return "translate(" + d[0].x + "," + d[0].height + ")";
+    });
 
     const exit = current.exit().classed("bar", false);
     exit.attr("fill", "red").attr("opacity", 1).transition().attr("opacity", 0).remove();
 
-    const rect = current.merge(enter).select("rect").attr("width", d => d.width).transition().duration(1000).attr("transform", d => `translate(${d.x}, ${d.y})`).attr("height", d => d.height);
+    const rect = current.merge(enter).select("rect").attr("width", d => d.width).transition().duration(1000).attr("transform", d => `translate(${d[0].x}, ${d[0].y})`).attr("height", d => d.height);
 });
 /* harmony export (immutable) */ __webpack_exports__["a"] = Bars;
 

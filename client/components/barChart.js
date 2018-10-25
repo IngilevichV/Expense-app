@@ -7,15 +7,24 @@ class BarChart extends Component {
         super();
     }
 
+    componentDidMount() {
+
+    }
+
     updateScale(props) {
-        const data = props.data;
+        console.info("props")
+        console.info(props);
+        // const data = props.data;
 
         const xScale = d3.scaleBand();
         const yScale = d3.scaleLinear().nice();
 
 
-        const xDomain = data.map(props.xFn);
-        const yDomain = [0, d3.max(data, d => props.yFn(d))];
+        // const xDomain = data.map(props.xFn);
+        // const xDomain = [2016,2017,2018,2019,2020]
+        const xDomain = d3.range(12);
+        // const yDomain = [0, d3.max(data, d => props.yFn(d))];
+        const yDomain = [0, 50000];
 
         xScale
             .domain(xDomain)
@@ -53,17 +62,33 @@ class BarChart extends Component {
         };
         const plotData = {
             plotData: this.props.data.map((d, i) => {
-                return {
-                    id: i,
-                    data: d,
-                    x: xScale(this.props.xFn(d)),
-                    y: yScale(this.props.yFn(d)),
-                    width: xScale.bandwidth() - 5,
-                    height: plotHeight - yScale(this.props.yFn(d))
-                };
+                return (
+                    d.map((new_d) => {
+                        return {
+                            id: i,
+                            data: d,
+                            x: xScale(i),
+                            y: yScale(new_d[1]),
+                            width: xScale.bandwidth() - 5,
+                            height: plotHeight - yScale(new_d[0]) - yScale(new_d[1])
+                        }
+                }))
+
+                // console.info(d);
+                // return {
+                //     id: i,
+                //     data: d,
+                //     x: xScale(i),
+                //     y: yScale(d[1]),
+                //     width: xScale.bandwidth() - 5,
+                //     height: d.map((new_d) => {
+                //         return plotHeight - yScale(new_d[0]) - yScale(new_d[1])
+                //     })
+                // };
             })
         };
-
+        console.info("metaData", metaData);
+        console.info("plotData", plotData);
         return (
             <svg width={this.props.width} height={this.props.height}>
                 <g
