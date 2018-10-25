@@ -9,7 +9,11 @@ import { Tab, Tabs } from 'react-bootstrap';
 import MonthTabs from './tabs/monthTabs';
 // import BarChart_old from './barChart';
 import BarChart from './barChart';
+import * as d3 from "d3";
+//TODO: Импортировать только нужную функцию
 
+
+// let parse = d3.timeFormat("%Y").parse;
 
 class App extends Component {
 
@@ -34,7 +38,7 @@ class App extends Component {
     }
 
     componentWillMount() {
-        this.getDataForBarChart(this, 2016, 'All')
+        this.getDataForBarChart(this, 'All', 'All')
     }
 
 
@@ -47,7 +51,7 @@ class App extends Component {
             this.setState({selectedYear: searchObj.year});
             this.setState({selectedMonth: searchObj.month});
             this.getData(this, searchObj.year, searchObj.month);
-            this.getDataForBarChart(this, 2016, 'All');
+            this.getDataForBarChart(this, 'All', 'All');
         }else{
             this.getData(this, 2016, 'All');
         }
@@ -64,14 +68,54 @@ class App extends Component {
     }
 
 
-    getDataForBarChart(ev, year, month){
 
+
+    getDataForBarChart(ev, year, month){
         axios.get('/getAll?month='+month+'&year='+year)
             .then(function(response) {
-                let data = []
+                let data = [];
                 response.data.map((obj) => {
                     data.push({title: obj.description, value: obj.amount})
                 });
+                // console.info("barChartData");
+                // console.info(response.data);
+                // let data_for_stacked = response.data;
+                // let stackedData = [];
+                // let yearsData = {};
+                // data_for_stacked.map(function(d){
+                //     if (Object.keys(yearsData).includes(String(d.year))) {
+                //         if (Object.keys(yearsData[d.year]).includes(d.month)) {
+                //             yearsData[d.year][d.month] += d.amount;
+                //         } else {
+                //             yearsData[d.year][d.month] = d.amount;
+                //         }
+                //     } else {
+                //         yearsData[d.year] = {};
+                //         yearsData[d.year][d.month] = d.amount;
+                //     }
+                // });
+                // // console.info(yearsData);
+                // for (let key in yearsData) {
+                //     // noinspection JSUnfilteredForInLoop
+                //     const tempObj = yearsData[key];
+                //     tempObj["year"] = key;
+                //     stackedData.push(tempObj);
+                // }
+                // console.info(stackedData);
+                // let test = []
+                // var data_test = d3.stack()(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(function(m) {
+                //     return stackedData.map(function(d) {
+                //         test.push() {x: parse(d.year), y: +d[fruit]);
+                //     });
+                // }));
+                //
+                // let data_test = d3.stack().(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'].map(function(m) {
+                //     return stackedData.map(function(d) {
+                //         test.push({x: new Date(d.year), y: d[m] ? +d[m] : 0});
+                //     });
+                // }));
+                // setTimeout(console.info(test), 1000000);
+
                 ev.setState({barChartData: data});
             });
     }
@@ -98,7 +142,7 @@ class App extends Component {
                     <Tab eventKey={2019} title={<YearTabsRouter year='2019'/>}><MonthTabs year='2019' monthlyActiveTab={this.state.selectedMonth}/></Tab>
                     <Tab eventKey={2020} title={<YearTabsRouter year='2020'/>}><MonthTabs year='2020' monthlyActiveTab={this.state.selectedMonth}/></Tab>
                 </Tabs>
-                <Add selectedMonth={this.state.selectedMonth} selectedYear={this.state.selectedYear} func={() => this.getDataForBarChart(this, 2016, 'All')}/>
+                <Add selectedMonth={this.state.selectedMonth} selectedYear={this.state.selectedYear} func={() => this.getDataForBarChart(this, 'All', 'All')}/>
                 <table>
                     <thead>
                     <tr>
@@ -120,8 +164,8 @@ class App extends Component {
                                 <td className='button-col'>{exp.amount}</td>
                                 <td className='button-col'>{exp.month}</td>
                                 <td className='button-col'>{exp.year}</td>
-                                <td className='button-col'><Update expense={exp} func={() => this.getDataForBarChart(this, 2016, 'All')}/></td>
-                                <td className='button-col'><Delete expense={exp} func={() => this.getDataForBarChart(this, 2016, 'All')}/></td>
+                                <td className='button-col'><Update expense={exp} func={() => this.getDataForBarChart(this, 'All', 'All')}/></td>
+                                <td className='button-col'><Delete expense={exp} func={() => this.getDataForBarChart(this, 'All', 'All')}/></td>
                             </tr>
                         })
                     }

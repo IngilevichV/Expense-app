@@ -55,7 +55,14 @@ router.get('/getAll',function(req, res) {
                 res.send(err);
             res.json(expenses);
         });
-    } else {
+    } else if ((monthRec && monthRec == 'All' && yearRec && yearRec == 'All')) {
+        Expense.find({}, function(err, expenses) {
+            if (err)
+                res.send(err);
+            res.json(expenses);
+        });
+    }
+    else {
         Expense.find({year: yearRec}, function(err, expenses) {
             if (err)
                 res.send(err);
