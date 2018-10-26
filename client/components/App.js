@@ -9,11 +9,9 @@ import { Tab, Tabs } from 'react-bootstrap';
 import MonthTabs from './tabs/monthTabs';
 // import BarChart_old from './barChart';
 import BarChart from './barChart';
-import * as d3 from "d3";
 //TODO: Импортировать только нужную функцию
 
 
-// let parse = d3.timeFormat("%Y").parse;
 
 class App extends Component {
 
@@ -25,21 +23,28 @@ class App extends Component {
             data: [],
             activeTab: 2016,
             barChartData: [],
-            body_width: document.body.clientWidth/2.5
+            body_width: document.body.clientWidth/2.2
         };
         this.getData = this.getData.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
-        this.checkChart = this.checkChart.bind(this);
         this.getDataForBarChart = this.getDataForBarChart.bind(this);
+        this.updateDimensions = this.updateDimensions.bind(this);
+    }
+
+    updateDimensions() {
+        this.setState({ body_width: document.body.clientWidth/2.2});
     }
 
     componentDidMount() {
         this.getData(this, 2016, 'All');
         this.getDataForBarChart(this, 'All', 'All');
+        this.updateDimensions();
+        window.addEventListener("resize", this.updateDimensions.bind(this));
     }
 
-    componentWillMount() {
-        console.info(this.state.barChartData);
+
+    componentWillUnmount() {
+        window.removeEventListener("resize", this.updateDimensions.bind(this));
     }
 
     componentWillReceiveProps(nextProps) {
@@ -98,24 +103,10 @@ class App extends Component {
                     stackedData.push(tempObj);
                 }
                 console.info("stacked_data", stackedData);
-
-                let test = d3.stack().keys(['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'])(stackedData);
-
-                test.forEach(function(arr) {
-                    arr.forEach(function(elem) {
-                        elem.forEach(function(e, i) {
-                            if (!e) {
-                                elem[i] = 0;
-                            }
-                        })
-                    })
-                })
-
-                console.info('print test', test);
-                return test;
+                return stackedData;
 
             })
-            .then(function(data) {ev.setState({barChartData: data});});
+            .then(function(stackedData) {ev.setState({barChartData: stackedData});});
     }
 
     handleSelect(selectedTab){
@@ -123,10 +114,6 @@ class App extends Component {
             activeTab: selectedTab,
             selectedYear: parseInt(selectedTab)
         });
-    }
-
-    checkChart() {
-        alert(this.state.data);
     }
 
     render() {
@@ -171,7 +158,6 @@ class App extends Component {
                     }
                     </tbody>
                 </table>
-                {/*<BarChart_old data={this.state.barChartData}/>*/}
                 <BarChart
                     className="barChartComponet"
                     data={this.state.barChartData}
@@ -179,10 +165,11 @@ class App extends Component {
                     height={430}
                     xFn={d => d.title}
                     yFn={d => d.value}
-                    margin={{ top: 60, left: 40, bottom: 20, right: 20 }}
+                    margin={{ top: 60, left: 50, bottom: 20, right: 20 }}
                     paddingInner={0.1}
                     paddingOuter={0.1}
                 />
+
             </div>
         );
     }

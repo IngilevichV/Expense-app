@@ -88,7 +88,6 @@ fieldset{
 
 
 
-
 .Axis path,
 .Axis line {
   stroke: #E0E0E0;
@@ -102,4 +101,8 @@ fieldset{
 .Axis-Bottom text {
   transform: rotate(-45deg);
   text-anchor: end;
+}
+
+.yGrid line{
+  stroke: lightgrey;
 }
