@@ -80,7 +80,7 @@ label{
 }
 fieldset{
   border:none;
-  margin:0px auto;
+  margin:0 auto;
 }
 .closebtn{
   float:right;
@@ -105,4 +105,8 @@ fieldset{
 
 .yGrid line{
   stroke: lightgrey;
+}
+
+.Legend text{
+  font-size: 15px;
 }

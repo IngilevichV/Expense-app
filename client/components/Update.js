@@ -11,7 +11,8 @@ class Update extends React.Component {
         super();
         this.state = {
             id: '',
-            description: '',
+            // description: '',
+            category: '',
             amount: '',
             month: '',
             year: '',
@@ -31,7 +32,8 @@ class Update extends React.Component {
     openModal() {
         this.setState({
             id: this.props.expense._id,
-            description: this.props.expense.description,
+            // description: this.props.expense.description,
+            category: this.props.expense.category,
             amount: this.props.expense.amount,
             month: this.props.expense.month,
             year: this.props.expense.year
@@ -57,7 +59,8 @@ class Update extends React.Component {
     componentDidMount() {
         this.setState({
             id: this.props.expense._id,
-            description: this.props.expense.description,
+            // description: this.props.expense.description,
+            category: this.props.expense.category,
             amount: this.props.expense.amount,
             month: this.props.expense.month,
             year: this.props.expense.year
@@ -68,7 +71,8 @@ class Update extends React.Component {
     componentWillReceiveProps(nextProps){
         this.setState({
             id: nextProps.expense._id,
-            description: nextProps.expense.description,
+            // description: nextProps.expense.description,
+            category: nextProps.expense.category,
             month:nextProps.expense.month,
             year:nextProps.expense.year
         })
@@ -85,15 +89,20 @@ class Update extends React.Component {
                 year: e.target.value
             });
         }
+        if (e.target.name === "category") {
+            this.setState({
+                category: e.target.value
+            })
+        }
     }
 
 
     handleTextChange(e) {
-        if (e.target.name === "description") {
-            this.setState({
-                description: e.target.value
-            });
-        }
+        // if (e.target.name === "description") {
+        //     this.setState({
+        //         description: e.target.value
+        //     });
+        // }
         if (e.target.name === "amount") {
             this.setState({
                 amount: e.target.value
@@ -105,7 +114,8 @@ class Update extends React.Component {
         axios.post('/update',
             querystring.stringify({
                 _id: e.state.id,
-                description: e.state.description,
+                // description: e.state.description,
+                category: e.state.category,
                 amount: e.state.amount,
                 month: e.state.month,
                 year: e.state.year
@@ -125,22 +135,36 @@ class Update extends React.Component {
         if(this.state.messageFromServer === '') {
             return(
                 <div>
-                    <Button bsStyle="warning" bsSize="small" onClick={this.openModal}><span className="glyphicon glyphicon-pencil"></span></Button>
+                    <Button bsStyle="warning" bsSize="small" onClick={this.openModal}><span className="glyphicon glyphicon-pencil"/></Button>
                     <Modal
                         isOpen={this.state.modalIsOpen}
                         onRequestClose={this.closeModal}
                         contentLabel="Update Expense"
                         className="Modal">
                         <Link to={{pathname: '/', search: '' }} style={{ textDecoration: 'none' }}>
-                            <Button bsStyle="danger" bsSize="mini" onClick={this.closeModal}><span className="closebtn glyphicon glyphicon-remove"></span></Button>
+                            <Button bsStyle="danger" bsSize="mini" onClick={this.closeModal}><span className="closebtn glyphicon glyphicon-remove"/></Button>
                         </Link><br/>
                         <fieldset>
-                            <label htmlFor="description">Описание:</label>
-                            <input type="text" id="description"
-                                   name="description"
-                                   value={this.state.description}
-                                   onChange={this.handleTextChange}>
-                            </input>
+                            {/*<label htmlFor="description">Описание:</label>*/}
+                            {/*<input type="text" id="description"*/}
+                                   {/*name="description"*/}
+                                   {/*value={this.state.description}*/}
+                                   {/*onChange={this.handleTextChange}>*/}
+                            {/*</input>*/}
+                            <label htmlFor="category">Категория:</label>
+                            <select id="category" name="category" value={this.state.category} onChange={this.handleSelectChange}>
+                                <option value="Продукты" id="Food">Продукты</option>
+                                <option value="Дом" id="Home">Дом</option>
+                                <option value="Транспорт" id="Transport">Транспорт</option>
+                                <option value="Развлечения" id="diversion">Развлечения</option>
+                                <option value="Косметика, Гигиена" id="Hygiene">Косметика, Гигиена</option>
+                                <option value="Медецина" id="Medicine">Медецина</option>
+                                <option value="Техника" id="Technique">Техника</option>
+                                <option value="Одежда" id="Clothes">Одежда</option>
+                                <option value="Спорт" id="Sport">Спорт</option>
+                                <option value="Путешествия" id="Voyage">Путешествия</option>
+                                <option value="Зоомагазины" id="Petshop">Зоомагазины</option>
+                            </select>
                             <label htmlFor="amount">Сумма:</label>
                             <input type="number" id="amount" name="amount"
                                    value={this.state.amount}

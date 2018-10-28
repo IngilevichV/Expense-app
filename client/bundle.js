@@ -44352,6 +44352,7 @@ const Routes = () => __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_react_bootstrap__ = __webpack_require__(44);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__tabs_monthTabs__ = __webpack_require__(543);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__barChart__ = __webpack_require__(545);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__Legend__ = __webpack_require__(883);
 
 
 
@@ -44361,9 +44362,9 @@ const Routes = () => __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement
 
 
 
-// import BarChart_old from './barChart';
 
-//TODO: Импортировать только нужную функцию
+
+// import RadioButton from './RadioButton';
 
 
 class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
@@ -44376,12 +44377,16 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
             data: [],
             activeTab: 2016,
             barChartData: [],
-            body_width: document.body.clientWidth / 2.2
+            body_width: document.body.clientWidth / 2.2,
+            keys: [],
+            availableYears: [2016, 2017, 2018, 2019, 2020],
+            barChartType: 'month'
         };
         this.getData = this.getData.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
         this.getDataForBarChart = this.getDataForBarChart.bind(this);
         this.updateDimensions = this.updateDimensions.bind(this);
+        this.handleRadioChange = this.handleRadioChange.bind(this);
     }
 
     updateDimensions() {
@@ -44394,6 +44399,9 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
         this.updateDimensions();
         window.addEventListener("resize", this.updateDimensions.bind(this));
     }
+    // componentDidUpdate() {
+    //     this.getDataForBarChart(this, 'All', 'All');
+    // }
 
     componentWillUnmount() {
         window.removeEventListener("resize", this.updateDimensions.bind(this));
@@ -44401,9 +44409,9 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
 
     componentWillReceiveProps(nextProps) {
         if (nextProps.history.location.search) {
-            var search = nextProps.history.location.search;
+            let search = nextProps.history.location.search;
             search = search.substring(1);
-            var searchObj = JSON.parse(`{"${decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"')}"}`);
+            let searchObj = JSON.parse(`{"${decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"')}"}`);
             this.setState({ activeTab: parseInt(searchObj.year) });
             this.setState({ selectedYear: searchObj.year });
             this.setState({ selectedMonth: searchObj.month });
@@ -44425,24 +44433,22 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
 
     getDataForBarChart(ev, year, month) {
         __WEBPACK_IMPORTED_MODULE_2_axios___default.a.get('/getAll?month=' + month + '&year=' + year).then(function (response) {
-            let data = [];
-            response.data.map(obj => {
-                data.push({ title: obj.description, value: obj.amount });
-            });
+
+            console.info("response", response.data);
 
             let data_for_stacked = response.data;
             let stackedData = [];
             let yearsData = {};
             data_for_stacked.map(function (d) {
                 if (Object.keys(yearsData).includes(String(d.year))) {
-                    if (Object.keys(yearsData[d.year]).includes(d.month)) {
-                        yearsData[d.year][d.month] += d.amount;
+                    if (Object.keys(yearsData[d.year]).includes(d.category)) {
+                        yearsData[d.year][d[ev.state.barChartType]] += d.amount;
                     } else {
-                        yearsData[d.year][d.month] = d.amount;
+                        yearsData[d.year][d[ev.state.barChartType]] = d.amount;
                     }
                 } else {
                     yearsData[d.year] = {};
-                    yearsData[d.year][d.month] = d.amount;
+                    yearsData[d.year][d[ev.state.barChartType]] = d.amount;
                 }
             });
 
@@ -44453,6 +44459,17 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
                 stackedData.push(tempObj);
             }
             console.info("stacked_data", stackedData);
+            let keys = [];
+            stackedData.map(function (obj) {
+                Object.keys(obj).map(function (k) {
+                    if (k !== "year" && !keys.includes(k)) {
+                        keys.push(k);
+                    }
+                });
+            });
+            ev.setState({ keys: keys });
+            console.info("data for BC");
+            console.info(stackedData);
             return stackedData;
         }).then(function (stackedData) {
             ev.setState({ barChartData: stackedData });
@@ -44466,42 +44483,34 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
         });
     }
 
+    handleRadioChange(event) {
+        // this.setState({
+        //    barChartType: event.target.value
+        // });
+        this.setState({ barChartType: event.target.value });
+        this.getDataForBarChart(this, 'All', 'All');
+        console.log(event);
+    }
+
     render() {
         console.info("render");
-        console.info(this.state.barChartData);
+        // console.info(this.state.availableYears);
+        let tabYears = this.state.availableYears;
+        let selectedMonth = this.state.selectedMonth;
+        const tabsElems = tabYears.map(yearOfTab => __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            __WEBPACK_IMPORTED_MODULE_7_react_bootstrap__["b" /* Tab */],
+            { eventKey: yearOfTab, title: __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__tabs_yearTabsRouter__["a" /* default */], { year: String(yearOfTab) }) },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__tabs_monthTabs__["a" /* default */], { year: String(yearOfTab), monthlyActiveTab: selectedMonth })
+        ));
         return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
             'div',
             null,
             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 __WEBPACK_IMPORTED_MODULE_7_react_bootstrap__["c" /* Tabs */],
                 { activeKey: this.state.activeTab, onSelect: this.handleSelect },
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    __WEBPACK_IMPORTED_MODULE_7_react_bootstrap__["b" /* Tab */],
-                    { eventKey: 2016, title: __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__tabs_yearTabsRouter__["a" /* default */], { year: '2016' }) },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__tabs_monthTabs__["a" /* default */], { year: '2016', monthlyActiveTab: this.state.selectedMonth })
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    __WEBPACK_IMPORTED_MODULE_7_react_bootstrap__["b" /* Tab */],
-                    { eventKey: 2017, title: __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__tabs_yearTabsRouter__["a" /* default */], { year: '2017' }) },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__tabs_monthTabs__["a" /* default */], { year: '2017', monthlyActiveTab: this.state.selectedMonth })
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    __WEBPACK_IMPORTED_MODULE_7_react_bootstrap__["b" /* Tab */],
-                    { eventKey: 2018, title: __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__tabs_yearTabsRouter__["a" /* default */], { year: '2018' }) },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__tabs_monthTabs__["a" /* default */], { year: '2018', monthlyActiveTab: this.state.selectedMonth })
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    __WEBPACK_IMPORTED_MODULE_7_react_bootstrap__["b" /* Tab */],
-                    { eventKey: 2019, title: __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__tabs_yearTabsRouter__["a" /* default */], { year: '2019' }) },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__tabs_monthTabs__["a" /* default */], { year: '2019', monthlyActiveTab: this.state.selectedMonth })
-                ),
-                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-                    __WEBPACK_IMPORTED_MODULE_7_react_bootstrap__["b" /* Tab */],
-                    { eventKey: 2020, title: __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_6__tabs_yearTabsRouter__["a" /* default */], { year: '2020' }) },
-                    __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__tabs_monthTabs__["a" /* default */], { year: '2020', monthlyActiveTab: this.state.selectedMonth })
-                )
+                tabsElems
             ),
-            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__Add__["a" /* default */], { selectedMonth: this.state.selectedMonth, selectedYear: this.state.selectedYear, func: () => this.getDataForBarChart(this, 'All', 'All') }),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_3__Add__["a" /* default */], { selectedMonth: selectedMonth, selectedYear: this.state.selectedYear, func: () => this.getDataForBarChart(this, 'All', 'All') }),
             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                 'table',
                 null,
@@ -44515,7 +44524,7 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'th',
                             { className: 'desc-col' },
-                            'Description'
+                            'Category'
                         ),
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'th',
@@ -44555,7 +44564,7 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
                             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                                 'td',
                                 { className: 'desc-col' },
-                                exp.description
+                                exp.category
                             ),
                             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                                 'td',
@@ -44586,6 +44595,26 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
                     })
                 )
             ),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                'div',
+                { className: 'radio-row' },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', {
+                    type: 'radio',
+                    name: 'month',
+                    value: 'month',
+                    checked: this.state.barChartType === 'month',
+                    onChange: e => this.handleRadioChange(e)
+                }),
+                '\u041F\u043E \u043C\u0435\u0441\u044F\u0446\u0430\u043C',
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', {
+                    type: 'radio',
+                    name: 'category',
+                    value: 'category',
+                    checked: this.state.barChartType === 'category',
+                    onChange: e => this.handleRadioChange(e)
+                }),
+                '\u041F\u043E \u043A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F\u043C'
+            ),
             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__barChart__["a" /* default */], {
                 className: 'barChartComponet',
                 data: this.state.barChartData,
@@ -44596,6 +44625,11 @@ class App extends __WEBPACK_IMPORTED_MODULE_0_react__["Component"] {
                 margin: { top: 60, left: 50, bottom: 20, right: 20 },
                 paddingInner: 0.1,
                 paddingOuter: 0.1
+            }),
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_10__Legend__["a" /* default */], {
+                width: 300,
+                height: 430,
+                data: this.state.keys
             })
         );
     }
@@ -44643,7 +44677,7 @@ exports = module.exports = __webpack_require__(363)(undefined);
 
 
 // module
-exports.push([module.i, ".App {\r\n  text-align: center;\r\n}\r\n\r\n.App-logo {\r\n  animation: App-logo-spin infinite 20s linear;\r\n  height: 80px;\r\n}\r\n\r\n.App-header {\r\n  background-color: #222;\r\n  height: 150px;\r\n  padding: 20px;\r\n  color: white;\r\n}\r\n\r\n.App-title {\r\n  font-size: 1.5em;\r\n}\r\n\r\n.App-intro {\r\n  font-size: large;\r\n}\r\n\r\n@keyframes App-logo-spin {\r\n  from { transform: rotate(0deg); }\r\n  to { transform: rotate(360deg); }\r\n}\r\n\r\n.button-col {\r\n  width:100px;\r\n  text-align:center;\r\n}\r\n.desc-col {\r\n  width:300px;\r\n  text-align:left;\r\n}\r\ntable {\r\n  counter-reset: tableCount;\r\n}\r\n.counterCell:before {\r\n  content: counter(tableCount);\r\n  counter-increment: tableCount;\r\n}\r\n.counterCell {\r\n  text-align: center;\r\n  width:50px;\r\n}\r\n.button-center {\r\n  text-align: center;\r\n}\r\n.Modal {\r\n  position: relative;\r\n  top: 250px;\r\n  left: 400px;\r\n  right: 20px;\r\n  bottom: 20px;\r\n  background-color: #F5F5F5;\r\n  width:500px;\r\n  border: 1px solid #000;\r\n  border-radius: 4px;\r\n  padding: 20px;\r\n}\r\n.Overlay {\r\n  position: fixed;\r\n  top: 0;\r\n  left: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  background-color: rebeccapurple;\r\n}\r\n.button-center {\r\n  text-align: center;\r\n}\r\nlabel{\r\n  display:inline-block;\r\n  width:200px;\r\n  margin-right:30px;\r\n  text-align:right;\r\n}\r\nfieldset{\r\n  border:none;\r\n  margin:0px auto;\r\n}\r\n.closebtn{\r\n  float:right;\r\n}\r\n\r\n\r\n\r\n.Axis path,\r\n.Axis line {\r\n  stroke: #E0E0E0;\r\n}\r\n\r\n.Axis text {\r\n  font-size: 11px;\r\n  fill: black;\r\n}\r\n\r\n.Axis-Bottom text {\r\n  transform: rotate(-45deg);\r\n  text-anchor: end;\r\n}\r\n\r\n.yGrid line{\r\n  stroke: lightgrey;\r\n}", ""]);
+exports.push([module.i, ".App {\r\n  text-align: center;\r\n}\r\n\r\n.App-logo {\r\n  animation: App-logo-spin infinite 20s linear;\r\n  height: 80px;\r\n}\r\n\r\n.App-header {\r\n  background-color: #222;\r\n  height: 150px;\r\n  padding: 20px;\r\n  color: white;\r\n}\r\n\r\n.App-title {\r\n  font-size: 1.5em;\r\n}\r\n\r\n.App-intro {\r\n  font-size: large;\r\n}\r\n\r\n@keyframes App-logo-spin {\r\n  from { transform: rotate(0deg); }\r\n  to { transform: rotate(360deg); }\r\n}\r\n\r\n.button-col {\r\n  width:100px;\r\n  text-align:center;\r\n}\r\n.desc-col {\r\n  width:300px;\r\n  text-align:left;\r\n}\r\ntable {\r\n  counter-reset: tableCount;\r\n}\r\n.counterCell:before {\r\n  content: counter(tableCount);\r\n  counter-increment: tableCount;\r\n}\r\n.counterCell {\r\n  text-align: center;\r\n  width:50px;\r\n}\r\n.button-center {\r\n  text-align: center;\r\n}\r\n.Modal {\r\n  position: relative;\r\n  top: 250px;\r\n  left: 400px;\r\n  right: 20px;\r\n  bottom: 20px;\r\n  background-color: #F5F5F5;\r\n  width:500px;\r\n  border: 1px solid #000;\r\n  border-radius: 4px;\r\n  padding: 20px;\r\n}\r\n.Overlay {\r\n  position: fixed;\r\n  top: 0;\r\n  left: 0;\r\n  right: 0;\r\n  bottom: 0;\r\n  background-color: rebeccapurple;\r\n}\r\n.button-center {\r\n  text-align: center;\r\n}\r\nlabel{\r\n  display:inline-block;\r\n  width:200px;\r\n  margin-right:30px;\r\n  text-align:right;\r\n}\r\nfieldset{\r\n  border:none;\r\n  margin:0 auto;\r\n}\r\n.closebtn{\r\n  float:right;\r\n}\r\n\r\n\r\n\r\n.Axis path,\r\n.Axis line {\r\n  stroke: #E0E0E0;\r\n}\r\n\r\n.Axis text {\r\n  font-size: 11px;\r\n  fill: black;\r\n}\r\n\r\n.Axis-Bottom text {\r\n  transform: rotate(-45deg);\r\n  text-anchor: end;\r\n}\r\n\r\n.yGrid line{\r\n  stroke: lightgrey;\r\n}\r\n\r\n.Legend text{\r\n  font-size: 15px;\r\n}", ""]);
 
 // exports
 
@@ -46104,7 +46138,7 @@ class Add extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     constructor() {
         super();
         this.state = {
-            description: '',
+            category: '',
             amount: '',
             month: '',
             year: '',
@@ -46134,7 +46168,8 @@ class Add extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
         this.props.func();
         this.setState({
             modalIsOpen: false,
-            description: '',
+            // description: '',
+            category: '',
             amount: '',
             month: 'Jan',
             year: 2016,
@@ -46143,9 +46178,6 @@ class Add extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     }
 
     componentDidMount() {
-        // this.setState({
-        //     month: this.props.selectedMonth
-        // });
         this.setState({
             year: this.props.selectedYear
         });
@@ -46174,14 +46206,19 @@ class Add extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
                 year: e.target.value
             });
         }
+        if (e.target.name === "category") {
+            this.setState({
+                category: e.target.value
+            });
+        }
     }
 
     handleTextChange(e) {
-        if (e.target.name === "description") {
-            this.setState({
-                description: e.target.value
-            });
-        }
+        // if (e.target.name === "description") {
+        //     this.setState({
+        //         description: e.target.value
+        //     });
+        // }
         if (e.target.name === "amount") {
             this.setState({
                 amount: e.target.value
@@ -46191,7 +46228,8 @@ class Add extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
 
     insertNewExpense(e) {
         __WEBPACK_IMPORTED_MODULE_3_axios___default.a.post('/insert', querystring.stringify({
-            desc: e.state.description,
+            // desc: e.state.description,
+            category: e.state.category,
             amount: e.state.amount,
             month: e.state.month,
             year: e.state.year
@@ -46238,13 +46276,68 @@ class Add extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
                         null,
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'label',
-                            { htmlFor: 'description' },
-                            '\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435:'
+                            { htmlFor: 'category' },
+                            '\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F:'
                         ),
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'text', id: 'description',
-                            name: 'description',
-                            value: this.state.description,
-                            onChange: this.handleTextChange }),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'select',
+                            { id: 'category', name: 'category', value: this.state.category, onChange: this.handleSelectChange },
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B', id: 'Food' },
+                                '\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0414\u043E\u043C', id: 'Home' },
+                                '\u0414\u043E\u043C'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0422\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442', id: 'Transport' },
+                                '\u0422\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0420\u0430\u0437\u0432\u043B\u0435\u0447\u0435\u043D\u0438\u044F', id: 'diversion' },
+                                '\u0420\u0430\u0437\u0432\u043B\u0435\u0447\u0435\u043D\u0438\u044F'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041A\u043E\u0441\u043C\u0435\u0442\u0438\u043A\u0430, \u0413\u0438\u0433\u0438\u0435\u043D\u0430', id: 'Hygiene' },
+                                '\u041A\u043E\u0441\u043C\u0435\u0442\u0438\u043A\u0430, \u0413\u0438\u0433\u0438\u0435\u043D\u0430'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041C\u0435\u0434\u0435\u0446\u0438\u043D\u0430', id: 'Medicine' },
+                                '\u041C\u0435\u0434\u0435\u0446\u0438\u043D\u0430'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0422\u0435\u0445\u043D\u0438\u043A\u0430', id: 'Technique' },
+                                '\u0422\u0435\u0445\u043D\u0438\u043A\u0430'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041E\u0434\u0435\u0436\u0434\u0430', id: 'Clothes' },
+                                '\u041E\u0434\u0435\u0436\u0434\u0430'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0421\u043F\u043E\u0440\u0442', id: 'Sport' },
+                                '\u0421\u043F\u043E\u0440\u0442'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041F\u0443\u0442\u0435\u0448\u0435\u0441\u0442\u0432\u0438\u044F', id: 'Voyage' },
+                                '\u041F\u0443\u0442\u0435\u0448\u0435\u0441\u0442\u0432\u0438\u044F'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0417\u043E\u043E\u043C\u0430\u0433\u0430\u0437\u0438\u043D\u044B', id: 'Petshop' },
+                                '\u0417\u043E\u043E\u043C\u0430\u0433\u0430\u0437\u0438\u043D\u044B'
+                            )
+                        ),
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'label',
                             { htmlFor: 'amount' },
@@ -57931,7 +58024,8 @@ class Update extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
         super();
         this.state = {
             id: '',
-            description: '',
+            // description: '',
+            category: '',
             amount: '',
             month: '',
             year: '',
@@ -57950,7 +58044,8 @@ class Update extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     openModal() {
         this.setState({
             id: this.props.expense._id,
-            description: this.props.expense.description,
+            // description: this.props.expense.description,
+            category: this.props.expense.category,
             amount: this.props.expense.amount,
             month: this.props.expense.month,
             year: this.props.expense.year
@@ -57975,7 +58070,8 @@ class Update extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     componentDidMount() {
         this.setState({
             id: this.props.expense._id,
-            description: this.props.expense.description,
+            // description: this.props.expense.description,
+            category: this.props.expense.category,
             amount: this.props.expense.amount,
             month: this.props.expense.month,
             year: this.props.expense.year
@@ -57985,7 +58081,8 @@ class Update extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     componentWillReceiveProps(nextProps) {
         this.setState({
             id: nextProps.expense._id,
-            description: nextProps.expense.description,
+            // description: nextProps.expense.description,
+            category: nextProps.expense.category,
             month: nextProps.expense.month,
             year: nextProps.expense.year
         });
@@ -58002,14 +58099,19 @@ class Update extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
                 year: e.target.value
             });
         }
+        if (e.target.name === "category") {
+            this.setState({
+                category: e.target.value
+            });
+        }
     }
 
     handleTextChange(e) {
-        if (e.target.name === "description") {
-            this.setState({
-                description: e.target.value
-            });
-        }
+        // if (e.target.name === "description") {
+        //     this.setState({
+        //         description: e.target.value
+        //     });
+        // }
         if (e.target.name === "amount") {
             this.setState({
                 amount: e.target.value
@@ -58020,7 +58122,8 @@ class Update extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
     update(e) {
         __WEBPACK_IMPORTED_MODULE_3_axios___default.a.post('/update', querystring.stringify({
             _id: e.state.id,
-            description: e.state.description,
+            // description: e.state.description,
+            category: e.state.category,
             amount: e.state.amount,
             month: e.state.month,
             year: e.state.year
@@ -58067,13 +58170,68 @@ class Update extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
                         null,
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'label',
-                            { htmlFor: 'description' },
-                            '\u041E\u043F\u0438\u0441\u0430\u043D\u0438\u0435:'
+                            { htmlFor: 'category' },
+                            '\u041A\u0430\u0442\u0435\u0433\u043E\u0440\u0438\u044F:'
                         ),
-                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement('input', { type: 'text', id: 'description',
-                            name: 'description',
-                            value: this.state.description,
-                            onChange: this.handleTextChange }),
+                        __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                            'select',
+                            { id: 'category', name: 'category', value: this.state.category, onChange: this.handleSelectChange },
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B', id: 'Food' },
+                                '\u041F\u0440\u043E\u0434\u0443\u043A\u0442\u044B'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0414\u043E\u043C', id: 'Home' },
+                                '\u0414\u043E\u043C'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0422\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442', id: 'Transport' },
+                                '\u0422\u0440\u0430\u043D\u0441\u043F\u043E\u0440\u0442'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0420\u0430\u0437\u0432\u043B\u0435\u0447\u0435\u043D\u0438\u044F', id: 'diversion' },
+                                '\u0420\u0430\u0437\u0432\u043B\u0435\u0447\u0435\u043D\u0438\u044F'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041A\u043E\u0441\u043C\u0435\u0442\u0438\u043A\u0430, \u0413\u0438\u0433\u0438\u0435\u043D\u0430', id: 'Hygiene' },
+                                '\u041A\u043E\u0441\u043C\u0435\u0442\u0438\u043A\u0430, \u0413\u0438\u0433\u0438\u0435\u043D\u0430'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041C\u0435\u0434\u0435\u0446\u0438\u043D\u0430', id: 'Medicine' },
+                                '\u041C\u0435\u0434\u0435\u0446\u0438\u043D\u0430'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0422\u0435\u0445\u043D\u0438\u043A\u0430', id: 'Technique' },
+                                '\u0422\u0435\u0445\u043D\u0438\u043A\u0430'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041E\u0434\u0435\u0436\u0434\u0430', id: 'Clothes' },
+                                '\u041E\u0434\u0435\u0436\u0434\u0430'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0421\u043F\u043E\u0440\u0442', id: 'Sport' },
+                                '\u0421\u043F\u043E\u0440\u0442'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u041F\u0443\u0442\u0435\u0448\u0435\u0441\u0442\u0432\u0438\u044F', id: 'Voyage' },
+                                '\u041F\u0443\u0442\u0435\u0448\u0435\u0441\u0442\u0432\u0438\u044F'
+                            ),
+                            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                                'option',
+                                { value: '\u0417\u043E\u043E\u043C\u0430\u0433\u0430\u0437\u0438\u043D\u044B', id: 'Petshop' },
+                                '\u0417\u043E\u043E\u043C\u0430\u0433\u0430\u0437\u0438\u043D\u044B'
+                            )
+                        ),
                         __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
                             'label',
                             { htmlFor: 'amount' },
@@ -73040,6 +73198,61 @@ class Bars extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
 }
 
 /* harmony default export */ __webpack_exports__["a"] = (Bars);
+
+/***/ }),
+/* 883 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(0);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
+
+
+var arr = ["#d5f4e6", '#80ced6', '#fefbd8', '#618685', "#d5f4e6", '#80ced6', '#fefbd8', '#618685', "#d5f4e6", '#80ced6', '#fefbd8', '#618685'];
+
+class Legend extends __WEBPACK_IMPORTED_MODULE_0_react___default.a.Component {
+    constructor(props) {
+        super(props);
+    }
+
+    render() {
+        const legendElements = this.props.data.map(function (d, i) {
+            return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                "g",
+                {
+                    key: i,
+                    transform: "translate(0," + i * 40 + ")"
+                },
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement("rect", {
+                    x: 0,
+                    y: 0,
+                    height: 30,
+                    width: 50,
+                    fill: arr[i] }),
+                __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                    "text",
+                    {
+                        x: 60,
+                        y: 20 },
+                    d
+                )
+            );
+        });
+
+        return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+            "svg",
+            { width: this.props.width, height: this.props.height, className: "Legend" },
+            __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
+                "g",
+                {
+                    transform: "translate(50, 60)" },
+                legendElements
+            )
+        );
+    }
+}
+
+/* harmony default export */ __webpack_exports__["a"] = (Legend);
 
 /***/ })
 /******/ ]);

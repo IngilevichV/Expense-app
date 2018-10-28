@@ -1,7 +1,8 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var expenseSchema = new Schema({
-    description: String,
+    // description: String,
+    category: String,
     amount: Number,
     month: String,
     year: Number

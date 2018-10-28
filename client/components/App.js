@@ -7,9 +7,10 @@ import Delete from './Delete';
 import YearTabsRouter from './tabs/yearTabsRouter';
 import { Tab, Tabs } from 'react-bootstrap';
 import MonthTabs from './tabs/monthTabs';
-// import BarChart_old from './barChart';
 import BarChart from './barChart';
-//TODO: Импортировать только нужную функцию
+import Legend from './Legend';
+// import RadioButton from './RadioButton';
+
 
 
 
@@ -23,12 +24,16 @@ class App extends Component {
             data: [],
             activeTab: 2016,
             barChartData: [],
-            body_width: document.body.clientWidth/2.2
+            body_width: document.body.clientWidth/2.2,
+            keys:[],
+            availableYears:[2016, 2017, 2018, 2019, 2020],
+            barChartType: 'month'
         };
         this.getData = this.getData.bind(this);
         this.handleSelect = this.handleSelect.bind(this);
         this.getDataForBarChart = this.getDataForBarChart.bind(this);
         this.updateDimensions = this.updateDimensions.bind(this);
+        this.handleRadioChange = this.handleRadioChange.bind(this);
     }
 
     updateDimensions() {
@@ -41,7 +46,9 @@ class App extends Component {
         this.updateDimensions();
         window.addEventListener("resize", this.updateDimensions.bind(this));
     }
-
+    // componentDidUpdate() {
+    //     this.getDataForBarChart(this, 'All', 'All');
+    // }
 
     componentWillUnmount() {
         window.removeEventListener("resize", this.updateDimensions.bind(this));
@@ -49,9 +56,9 @@ class App extends Component {
 
     componentWillReceiveProps(nextProps) {
         if(nextProps.history.location.search) {
-            var search = nextProps.history.location.search;
+            let search = nextProps.history.location.search;
             search = search.substring(1);
-            var searchObj = JSON.parse(`{"${decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"')}"}`);
+            let searchObj = JSON.parse(`{"${decodeURI(search).replace(/"/g, '\\"').replace(/&/g, '","').replace(/=/g, '":"')}"}`);
             this.setState({activeTab: parseInt(searchObj.year)});
             this.setState({selectedYear: searchObj.year});
             this.setState({selectedMonth: searchObj.month});
@@ -75,24 +82,22 @@ class App extends Component {
     getDataForBarChart(ev, year, month){
         axios.get('/getAll?month='+month+'&year='+year)
             .then(function(response) {
-                let data = [];
-                response.data.map((obj) => {
-                    data.push({title: obj.description, value: obj.amount})
-                });
+
+                console.info("response", response.data);
 
                 let data_for_stacked = response.data;
                 let stackedData = [];
                 let yearsData = {};
                 data_for_stacked.map(function(d){
                     if (Object.keys(yearsData).includes(String(d.year))) {
-                        if (Object.keys(yearsData[d.year]).includes(d.month)) {
-                            yearsData[d.year][d.month] += d.amount;
+                        if (Object.keys(yearsData[d.year]).includes(d.category)) {
+                            yearsData[d.year][d[ev.state.barChartType]] += d.amount;
                         } else {
-                            yearsData[d.year][d.month] = d.amount;
+                            yearsData[d.year][d[ev.state.barChartType]] = d.amount;
                         }
                     } else {
                         yearsData[d.year] = {};
-                        yearsData[d.year][d.month] = d.amount;
+                        yearsData[d.year][d[ev.state.barChartType]] = d.amount;
                     }
                 });
 
@@ -103,6 +108,17 @@ class App extends Component {
                     stackedData.push(tempObj);
                 }
                 console.info("stacked_data", stackedData);
+                let keys = [];
+                stackedData.map(function(obj) {
+                    Object.keys(obj).map(function(k) {
+                        if (k!=="year" && !keys.includes(k)){
+                            keys.push(k);
+                        }
+                    })
+                });
+                ev.setState({keys: keys});
+                console.info("data for BC");
+                console.info(stackedData);
                 return stackedData;
 
             })
@@ -116,25 +132,37 @@ class App extends Component {
         });
     }
 
+    handleRadioChange(event) {
+        // this.setState({
+        //    barChartType: event.target.value
+        // });
+        this.setState({ barChartType: event.target.value });
+        this.getDataForBarChart(this, 'All', 'All')
+        console.log(event);
+    }
+
     render() {
         console.info("render");
-        console.info(this.state.barChartData);
+        // console.info(this.state.availableYears);
+        let tabYears = this.state.availableYears;
+        let selectedMonth = this.state.selectedMonth;
+        const tabsElems = (
+            tabYears.map((yearOfTab) =>
+                <Tab eventKey={yearOfTab} title={<YearTabsRouter year={String(yearOfTab)}/>}><MonthTabs year={String(yearOfTab)} monthlyActiveTab={selectedMonth}/></Tab>
+            )
+        );
         return (
 
             <div>
                 <Tabs activeKey={this.state.activeTab} onSelect={this.handleSelect}>
-                    <Tab eventKey={2016} title={<YearTabsRouter year='2016'/>}><MonthTabs year='2016' monthlyActiveTab={this.state.selectedMonth}/></Tab>
-                    <Tab eventKey={2017} title={<YearTabsRouter year='2017'/>}><MonthTabs year='2017' monthlyActiveTab={this.state.selectedMonth}/></Tab>
-                    <Tab eventKey={2018} title={<YearTabsRouter year='2018'/>}><MonthTabs year='2018' monthlyActiveTab={this.state.selectedMonth}/></Tab>
-                    <Tab eventKey={2019} title={<YearTabsRouter year='2019'/>}><MonthTabs year='2019' monthlyActiveTab={this.state.selectedMonth}/></Tab>
-                    <Tab eventKey={2020} title={<YearTabsRouter year='2020'/>}><MonthTabs year='2020' monthlyActiveTab={this.state.selectedMonth}/></Tab>
+                    {tabsElems}
                 </Tabs>
-                <Add selectedMonth={this.state.selectedMonth} selectedYear={this.state.selectedYear} func={() => this.getDataForBarChart(this, 'All', 'All')}/>
+                <Add selectedMonth={selectedMonth} selectedYear={this.state.selectedYear} func={() => this.getDataForBarChart(this, 'All', 'All')}/>
                 <table>
                     <thead>
                     <tr>
                         <th/>
-                        <th className='desc-col'>Description</th>
+                        <th className='desc-col'>Category</th>
                         <th className='button-col'>Amount</th>
                         <th className='button-col'>Month</th>
                         <th className='button-col'>Year</th>
@@ -147,7 +175,7 @@ class App extends Component {
                         this.state.data.map((exp) => {
                             return  <tr>
                                 <td className='counterCell'/>
-                                <td className='desc-col'>{exp.description}</td>
+                                <td className='desc-col'>{exp.category}</td>
                                 <td className='button-col'>{exp.amount}</td>
                                 <td className='button-col'>{exp.month}</td>
                                 <td className='button-col'>{exp.year}</td>
@@ -158,6 +186,31 @@ class App extends Component {
                     }
                     </tbody>
                 </table>
+                {/*<div onChange={this.setTypeOfBarchart.bind(this)}>*/}
+                    {/*<input type="radio" value="month" name="month"  defaultChecked={true}/> По месяцам*/}
+                    {/*<input type="radio" value="category" name="category" /> По категориям*/}
+                {/*</div>*/}
+
+                <div className="radio-row">
+                    <input
+                        type="radio"
+                        name="month"
+                        value="month"
+                        checked={this.state.barChartType === 'month'}
+                        onChange={(e) => this.handleRadioChange(e)}
+                    />По месяцам
+                    {/*<label htmlFor="month">По месяцам</label>*/}
+                    <input
+                        type="radio"
+                        name="category"
+                        value="category"
+                        checked={this.state.barChartType === 'category'}
+                        onChange={(e) => this.handleRadioChange(e)}
+                    />По категориям
+                    {/*<label htmlFor="category">По категориям</label>*/}
+                </div>
+
+
                 <BarChart
                     className="barChartComponet"
                     data={this.state.barChartData}
@@ -169,6 +222,12 @@ class App extends Component {
                     paddingInner={0.1}
                     paddingOuter={0.1}
                 />
+                <Legend
+                    width={300}
+                    height={430}
+                    data={this.state.keys}
+                />
+
 
             </div>
         );

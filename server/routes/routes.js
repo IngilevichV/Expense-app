@@ -10,7 +10,10 @@ router.get('/', function(req, res){
 router.route('/insert')
     .post(function(req,res) {
         var expense = new Expense();
-        expense.description = req.body.desc;
+        // expense.description = req.body.desc;
+        console.info("req");
+        console.info(req.body);
+        expense.category = req.body.category;
         expense.amount = req.body.amount;
         expense.month = req.body.month;
         expense.year = req.body.year;
@@ -24,12 +27,12 @@ router.route('/insert')
 router.route('/update')
     .post(function(req, res) {
         const doc = {
-            description: req.body.description,
+            // description: req.body.description,
+            category: req.body.category,
             amount: req.body.amount,
             month: req.body.month,
             year: req.body.year
         };
-        console.log(doc);
         Expense.update({_id: req.body._id}, doc, function(err, result) {
             if (err)
                 res.send(err);
@@ -55,7 +58,7 @@ router.get('/getAll',function(req, res) {
                 res.send(err);
             res.json(expenses);
         });
-    } else if ((monthRec && monthRec == 'All' && yearRec && yearRec == 'All')) {
+    } else if ((monthRec && monthRec === 'All' && yearRec && yearRec === 'All')) {
         Expense.find({}, function(err, expenses) {
             if (err)
                 res.send(err);

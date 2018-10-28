@@ -10,13 +10,13 @@ class Add extends React.Component {
     constructor() {
         super();
         this.state = {
-            description: '',
+            category: '',
             amount: '',
             month: '',
             year: '',
             messageFromServer: '',
             modalIsOpen: false
-        }
+        };
 
         this.handleSelectChange = this.handleSelectChange.bind(this);
         this.onClick = this.onClick.bind(this);
@@ -35,26 +35,22 @@ class Add extends React.Component {
 
     onClick(e) {
         this.insertNewExpense(this);
-
     }
 
     closeModal() {
         this.props.func();
         this.setState({
             modalIsOpen: false,
-            description: '',
+            // description: '',
+            category: '',
             amount: '',
             month: 'Jan',
             year: 2016,
             messageFromServer: ''
         });
-
     }
 
     componentDidMount() {
-        // this.setState({
-        //     month: this.props.selectedMonth
-        // });
         this.setState({
             year: this.props.selectedYear
         });
@@ -83,26 +79,33 @@ class Add extends React.Component {
                 year: e.target.value
             });
         }
+        if (e.target.name === "category") {
+            this.setState({
+                category: e.target.value
+            })
+        }
     }
 
 
     handleTextChange(e) {
-        if (e.target.name === "description") {
-            this.setState({
-                description: e.target.value
-            });
-        }
+        // if (e.target.name === "description") {
+        //     this.setState({
+        //         description: e.target.value
+        //     });
+        // }
         if (e.target.name === "amount") {
             this.setState({
                 amount: e.target.value
             });
         }
+
     }
 
     insertNewExpense(e) {
         axios.post('/insert',
             querystring.stringify({
-                desc: e.state.description,
+                // desc: e.state.description,
+                category: e.state.category,
                 amount: e.state.amount,
                 month: e.state.month,
                 year: e.state.year
@@ -121,22 +124,37 @@ class Add extends React.Component {
         if(this.state.messageFromServer === '') {
             return(
                 <div>
-                    <Button bsStyle="success" bsSize="small" onClick={this.openModal}><span className="glyphicon glyphicon-plus"></span></Button>
+                    <Button bsStyle="success" bsSize="small" onClick={this.openModal}><span className="glyphicon glyphicon-plus"/></Button>
                     <Modal
                         isOpen={this.state.modalIsOpen}
                         onRequestClose={this.closeModal}
                         contentLabel="Add Expense"
                         className="Modal">
                         <Link to={{pathname: '/', search: '' }} style={{ textDecoration: 'none' }}>
-                            <Button bsStyle="danger" bsSize="mini" onClick={this.closeModal}><span className="closebtn glyphicon glyphicon-remove"></span></Button>
+                            <Button bsStyle="danger" bsSize="mini" onClick={this.closeModal}><span className="closebtn glyphicon glyphicon-remove"/></Button>
                         </Link><br/>
                         <fieldset>
-                            <label htmlFor="description">Описание:</label>
-                            <input type="text" id="description"
-                                name="description"
-                                value={this.state.description}
-                                onChange={this.handleTextChange}>
-                            </input>
+                            {/*<label htmlFor="description">Описание:</label>*/}
+                            {/*<input type="text" id="description"*/}
+                                {/*name="description"*/}
+                                {/*value={this.state.description}*/}
+                                {/*onChange={this.handleTextChange}>*/}
+                            {/*</input>*/}
+                            <label htmlFor="category">Категория:</label>
+                            <select id="category" name="category" value={this.state.category} onChange={this.handleSelectChange}>
+                                <option value="Продукты" id="Food">Продукты</option>
+                                <option value="Дом" id="Home">Дом</option>
+                                <option value="Транспорт" id="Transport">Транспорт</option>
+                                <option value="Развлечения" id="diversion">Развлечения</option>
+                                <option value="Косметика, Гигиена" id="Hygiene">Косметика, Гигиена</option>
+                                <option value="Медецина" id="Medicine">Медецина</option>
+                                <option value="Техника" id="Technique">Техника</option>
+                                <option value="Одежда" id="Clothes">Одежда</option>
+                                <option value="Спорт" id="Sport">Спорт</option>
+                                <option value="Путешествия" id="Voyage">Путешествия</option>
+                                <option value="Зоомагазины" id="Petshop">Зоомагазины</option>
+                            </select>
+
                             <label htmlFor="amount">Сумма:</label>
                             <input type="number" id="amount" name="amount"
                                   value={this.state.amount}
